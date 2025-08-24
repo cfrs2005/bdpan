@@ -48,9 +48,9 @@ cd bdpan
 ```bash
 # 复制配置文件模板
 cp config.json.example config.json
-cp cookie.txt.example cookie.txt
 
-# 编辑配置文件，添加您的API密钥和Cookie
+# 编辑配置文件，添加您的API密钥
+# 百度网盘Cookie将通过Web界面配置
 ```
 
 3. **启动服务**
@@ -75,8 +75,7 @@ pip install -r requirements.txt
 2. **配置文件**
 ```bash
 cp config.json.example config.json
-cp cookie.txt.example cookie.txt
-# 编辑配置文件
+# 编辑配置文件，添加API密钥
 ```
 
 3. **启动服务**
@@ -100,13 +99,16 @@ python main.py
 }
 ```
 
-### cookie.txt 配置
+### 百度网盘Cookie配置
 
-从百度网盘网页版获取Cookie:
-1. 登录百度网盘网页版
-2. 按F12打开开发者工具
-3. 在Network标签页找到pan.baidu.com的请求
-4. 复制Cookie值到cookie.txt文件
+系统启动后，通过Web界面配置百度网盘Cookie:
+1. 访问配置页面: http://localhost:5001/config
+2. 在"存储配置"标签页中添加百度网盘Cookie
+3. Cookie获取方法：
+   - 登录百度网盘网页版
+   - 按F12打开开发者工具
+   - 在Network标签页找到pan.baidu.com的请求
+   - 复制完整Cookie值粘贴到配置页面
 
 ## 🌐 API 接口
 
@@ -154,7 +156,6 @@ bdpan/
 ├── docker-compose.dev.yml # 开发环境配置
 ├── requirements.txt       # Python依赖
 ├── config.json.example    # 配置模板
-├── cookie.txt.example     # Cookie模板
 ├── LICENSE               # MIT开源协议
 ├── templates/            # HTML模板
 ├── static/              # 静态资源

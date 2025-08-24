@@ -10,8 +10,7 @@ services:
       - FLASK_DEBUG=0
       - PYTHONPATH=/app
     volumes:
-      - ./config.json:/app/config.json
-      - ./cookie.txt:/app/cookie.txt
+      - ./config.json:/app/config.json:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/api/status/system"]

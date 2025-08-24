@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "豆瓣入库助手",
+  "version": "1.0",
+  "description": "在豆瓣电影页面添加一个按钮，将电影信息发送到本地服务进行入库。",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://movie.douban.com/subject/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_title": "豆瓣入库助手",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}

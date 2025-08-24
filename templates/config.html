@@ -1,0 +1,709 @@
+{% extends "base.html" %}
+
+{% block title %}
+系统配置 - 网盘搜索转存系统
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-cog"></i> 系统配置</h1>
+                <p class="text-muted">配置和管理系统设置、API密钥和服务参数</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="saveConfiguration()">
+                <i class="fas fa-save"></i> 保存配置
+            </button>
+        </div>
+
+        <!-- 配置导航 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#api-config" type="button">
+                            <i class="fas fa-key"></i> API配置
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#storage-config" type="button">
+                            <i class="fas fa-cloud"></i> 存储配置
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#system-config" type="button">
+                            <i class="fas fa-sliders-h"></i> 系统设置
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#advanced-config" type="button">
+                            <i class="fas fa-tools"></i> 高级设置
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <form id="config-form">
+                    <div class="tab-content">
+                        <!-- API配置 -->
+                        <div class="tab-pane fade show active" id="api-config">
+                            <div class="mb-4">
+                                <h5><i class="fab fa-tmdb"></i> TMDb API配置</h5>
+                                <p class="text-muted">电影/电视剧信息识别的API密钥</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tmdb-api-key" class="form-label">
+                                    TMDb API密钥 <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="tmdb-api-key" 
+                                           value="04f3d954e65c4598b6863fee20fff697"
+                                           placeholder="输入您的TMDb API密钥">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('tmdb-api-key')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    在 <a href="https://www.themoviedb.org/settings/api" target="_blank">TMDb官网</a> 获取API密钥
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tmdb-language" class="form-label">语言设置</label>
+                                <select class="form-select" id="tmdb-language">
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="en-US">English (US)</option>
+                                    <option value="zh-TW">繁體中文</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5><i class="fas fa-search"></i> 资源搜索API</h5>
+                                <p class="text-muted">第三方网盘资源搜索服务配置</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="search-api-endpoint" class="form-label">搜索API端点</label>
+                                <input type="url" 
+                                       class="form-control" 
+                                       id="search-api-endpoint" 
+                                       value="https://so.252035.xyz/api/search"
+                                       placeholder="https://api.example.com/search">
+                                <div class="form-text">
+                                    支持多个端点，用于搜索网盘共享资源
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 存储配置 -->
+                        <div class="tab-pane fade" id="storage-config">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-hdd"></i> 百度网盘存储配置</h5>
+                                <p class="text-muted">设置转存资源的存储目录</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="movie-path" class="form-label">电影存储目录</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-film"></i></span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="movie-path" 
+                                           value="/我的资源/2025/电影"
+                                           placeholder="/路径/到/电影/目录">
+                                </div>
+                                <div class="form-text">
+                                    电影资源的存储目录路径
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tv-path" class="form-label">电视剧存储目录</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tv"></i></span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="tv-path" 
+                                           value="/我的资源/2025/电视剧"
+                                           placeholder="/路径/到/电视剧/目录">
+                                </div>
+                                <div class="form-text">
+                                    电视剧资源的存储目录路径
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5><i class="fas fa-user"></i> Baidu网盘认证</h5>
+                                <p class="text-muted">直接使用Cookie在Web界面中添加百度网盘用户</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cookies-input" class="form-label">百度网盘Cookie <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-cookie-bite"></i></span>
+                                    <textarea class="form-control" 
+                                              id="cookies-input" 
+                                              rows="5" 
+                                              placeholder="请输入完整的Cookie字符串，格式: key=value; key2=value2; ...&#10;&#10;系统会自动提取BDUSS等必要信息"></textarea>
+                                </div>
+                                <div class="form-text">
+                                    粘贴从浏览器获取的完整Cookie字符串即可，包含BDUSS、BAIDUID、PANPSC等关键值
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="account-name-input" class="form-label">账户名称（可选）</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="account-name-input" 
+                                       placeholder="如：我的百度网盘">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="alert alert-info">
+                                    <strong>如何获取Cookie：</strong>
+                                    <ol class="mb-1">
+                                        <li>用浏览器打开pan.baidu.com并登录</li>
+                                        <li>按F12打开开发者工具 → Network</li>
+                                        <li>刷新页面 → 选择任意请求 → Headers</li>
+                                        <li>复制Request Headers中的完整Cookie字符串</li>
+                                        <li>粘贴到上方文本框中</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">认证状态</label>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-secondary" id="auth-status">未配置</span>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshAuthStatus()">
+                                            <i class="fas fa-sync"></i> 刷新状态
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button type="button" class="btn btn-success" onclick="saveBaiduAuth()">
+                                        <i class="fas fa-save"></i> 保存认证
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-primary" onclick="testCurrentAccount()">
+                                    <i class="fas fa-play-circle"></i> 测试当前账户
+                                </button>
+                                
+                                <button type="button" class="btn btn-outline-info ms-2" onclick="showCookieGuide()">
+                                    <i class="fas fa-question-circle"></i> 获取Cookie指导
+                                </button>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label">Cookie状态</label>
+                                    <span class="badge bg-warning" id="cookie-status">待验证</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 系统设置 -->
+                        <div class="tab-pane fade" id="system-config">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-server"></i> Flask服务器设置</h5>
+                                <p class="text-muted">Web服务运行参数配置</p>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="server-host" class="form-label">服务器IP地址</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="server-host" 
+                                               value="0.0.0.0"
+                                               placeholder="0.0.0.0">
+                                        <div class="form-text">
+                                            绑定IP地址，0.0.0.0表示监听所有接口
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="server-port" class="form-label">服务器端口</label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="server-port" 
+                                               value="5001"
+                                               min="1000" 
+                                               max="65535">
+                                        <div class="form-text">
+                                            Web服务监听端口
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="debug-mode" checked>
+                                    <label class="form-check-label" for="debug-mode">
+                                        启用调试模式
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    调试模式下将显示详细的错误信息
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5><i class="fas fa-language"></i> 接口配置</h5>
+                                <p class="text-muted">API接口路径前缀设置</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="api-prefix" class="form-label">API路径前缀</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="api-prefix" 
+                                       value="/api"
+                                       placeholder="/api">
+                                <div class="form-text">
+                                    所有API接口的前置路径，例如：/api/save
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 高级设置 -->
+                        <div class="tab-pane fade" id="advanced-config">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-cogs"></i> 高级系统设置</h5>
+                                <p class="text-muted">高级用户的高级配置选项</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="max-logs" class="form-label">最大日志数量</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="max-logs" 
+                                       value="500"
+                                       min="100" 
+                                       max="10000">
+                                <div class="form-text">
+                                    每次操作保存的最大日志条目数
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="search-timeout" class="form-label">搜索超时时间（秒）</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="search-timeout" 
+                                       value="30"
+                                       min="5" 
+                                       max="300">
+                                <div class="form-text">
+                                    搜索请求的超时时间，建议设置为30秒
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="user-agent" class="form-label">User Agent</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="user-agent" 
+                                       value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="custom-cookies" class="form-label">自定义Cookie（可选）</label>
+                                <textarea class="form-control" 
+                                          id="custom-cookies" 
+                                          rows="3" 
+                                          placeholder="自定义Cookie信息，格式：key=value多个用分号分隔"></textarea>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle"></i> 注意事项</h6>
+                                <ul class="mb-0">
+                                    <li>修改高级设置可能影响系统稳定性</li>
+                                    <li>更改后请确保测试相关功能</li>
+                                    <li>建议定期备份配置参数</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <button type="button" class="btn btn-outline-success" onclick="resetToDefaults()">
+                    <i class="fas fa-undo"></i> 恢复默认
+                </button>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="button" class="btn btn-success" onclick="saveConfiguration()">
+                    <i class="fas fa-save"></i> 保存所有配置
+                </button>
+            </div>
+        </div>
+
+        <!-- 配置状态提示 -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="config-alerts"></div>
+            </div>
+        </div>
+
+        <!-- 配置导出/导入 -->
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-download"></i> 配置管理
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="exportConfiguration()">
+                                    <i class="fas fa-file-export"></i> 导出配置
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="importConfiguration()">
+                                    <i class="fas fa-file-import"></i> 导入配置
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="btn btn-outline-info w-100">
+                                    <i class="fas fa-cloud-upload-alt"></i> 选择配置文件
+                                    <input type="file" id="config-upload" accept=".json" style="display: none;">
+                                </label>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-danger w-100" onclick="resetAllConfiguration()">
+                                    <i class="fas fa-trash-alt"></i> 重置配置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/baidu-auth.js') }}"></script>
+<script>
+// 配置页面专用脚本
+const defaultConfig = {
+    tmdb_api_key: '04f3d954e65c4598b6863fee20fff697',
+    tmdb_language: 'zh-CN',
+    search_api_endpoint: 'https://so.252035.xyz/api/search',
+    movie_path: '/我的资源/2025/电影',
+    tv_path: '/我的资源/2025/电视剧',
+    server_host: '0.0.0.0',
+    server_port: 5001,
+    debug_mode: true,
+    api_prefix: '/api',
+    max_logs: 500,
+    search_timeout: 30,
+    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+    custom_cookies: ''
+};
+
+// 页面加载完成后执行
+$(document).ready(function() {
+    loadCurrentConfig();
+    
+    // 绑定文件上传事件
+    $('#config-upload').on('change', handleConfigFileUpload);
+    
+    // 绑定表单变化监听
+    $('input, select, textarea').on('change input', function() {
+        markConfigAsModified();
+    });
+    
+    // 绑定表单提交事件
+    $('#config-form').on('submit', function(e) {
+        e.preventDefault();
+        saveConfiguration();
+    });
+});
+
+// 加载当前配置
+function loadCurrentConfig() {
+    const config = loadConfigFromStorage() || defaultConfig;
+    
+    // 填充表单
+    $('#tmdb-api-key').val(config.tmdb_api_key || '');
+    $('#tmdb-language').val(config.tmdb_language || 'zh-CN');
+    $('#search-api-endpoint').val(config.search_api_endpoint || '');
+    $('#movie-path').val(config.movie_path || '');
+    $('#tv-path').val(config.tv_path || '');
+    $('#server-host').val(config.server_host || '');
+    $('#server-port').val(config.server_port || '');
+    $('#debug-mode').prop('checked', config.debug_mode || false);
+    $('#api-prefix').val(config.api_prefix || '');
+    $('#max-logs').val(config.max_logs || 500);
+    $('#search-timeout').val(config.search_timeout || 30);
+    $('#user-agent').val(config.user_agent || '');
+    $('#custom-cookies').val(config.custom_cookies || '');
+    
+    markConfigAsSaved();
+}
+
+// 从存储加载配置
+function loadConfigFromStorage() {
+    try {
+        const config = localStorage.getItem('systemConfig');
+        return config ? JSON.parse(config) : null;
+    } catch (error) {
+        console.error('加载配置失败:', error);
+        return null;
+    }
+}
+
+// 获取当前配置
+function getCurrentConfig() {
+    return {
+        'tmdb_api_key': $('#tmdb-api-key').val(),
+        'tmdb_language': $('#tmdb-language').val(),
+        'search_api_endpoint': $('#search-api-endpoint').val(),
+        'movie_path': $('#movie-path').val(),
+        'tv_path': $('#tv-path').val(),
+        'server_host': $('#server-host').val(),
+        'server_port': parseInt($('#server-port').val()) || 5001,
+        'debug_mode': $('#debug-mode').is(':checked'),
+        'api_prefix': $('#api-prefix').val(),
+        'max_logs': parseInt($('#max-logs').val()) || 500,
+        'search_timeout': parseInt($('#search-timeout').val()) || 30,
+        'user_agent': $('#user-agent').val(),
+        'custom_cookies': $('#custom-cookies').val()
+    };
+}
+
+// 显示配置提示函数
+function showConfigAlert(message, type = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'danger': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    };
+    
+    const alertHtml = `
+        <div class="alert ${alertClass[type]} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    const alertsContainer = $('#config-alerts');
+    if (alertsContainer.length > 0) {
+        alertsContainer.html(alertHtml);
+        
+        // 安全地设置自动关闭
+        setTimeout(() => {
+            const alertElement = alertsContainer.find('.alert');
+            if (alertElement.length > 0) {
+                try {
+                    // 使用Bootstrap 5的方式关闭alert
+                    const bsAlert = new bootstrap.Alert(alertElement[0]);
+                    bsAlert.close();
+                } catch (e) {
+                    // 如果Bootstrap不可用，手动移除
+                    alertElement.fadeOut(() => {
+                        alertElement.remove();
+                    });
+                }
+            }
+        }, 5000);
+    }
+}
+
+// 保存配置到后端API
+function saveConfiguration() {
+    const config = getCurrentConfig();
+    
+    showConfigAlert('正在保存配置...', 'info');
+    
+    // 调用后端API保存配置
+    $.ajax({
+        url: '/api/config',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(config),
+        success: function(response) {
+            if (response.status === 'success') {
+                // 同时保存到localStorage作为备份
+                try {
+                    localStorage.setItem('systemConfig', JSON.stringify(config));
+                } catch (e) {
+                    console.warn('保存到localStorage失败:', e);
+                }
+                
+                showConfigAlert('配置保存成功！部分更改将在重启后生效', 'success');
+                markConfigAsSaved();
+            } else {
+                showConfigAlert('保存失败: ' + (response.message || '未知错误'), 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('保存配置失败:', xhr, status, error);
+            showConfigAlert('保存失败: ' + (error || '网络错误'), 'danger');
+        }
+    });
+}
+
+// 重置为默认配置
+function resetToDefaults() {
+    if (confirm('确定要将所有设置重置为默认值吗？此操作不可撤销。')) {
+        Object.keys(defaultConfig).forEach(key => {
+            const element = $(`#${key.replace(/_/g, '-')}`);
+            const value = defaultConfig[key];
+            
+            if (element.is(':checkbox')) {
+                element.prop('checked', value);
+            } else {
+                element.val(value);
+            }
+        });
+        
+        saveConfiguration();
+        showConfigAlert('已恢复默认配置！', 'info');
+    }
+}
+
+// 测试Cookie状态
+function testCookieStatus() {
+    showConfigAlert('正在验证Cookie状态...', 'info');
+    
+    // 检查cookie.txt文件是否存在
+    fetch('/api/check-cookie')
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                $('#cookie-status').removeClass('badge-warning badge-danger')
+                    .addClass('badge bg-success').text('文件存在');
+                showConfigAlert('Cookie文件验证完成！', 'success');
+            } else {
+                $('#cookie-status').removeClass('badge-success badge-danger')
+                    .addClass('badge bg-warning').text('文件缺失');
+                showConfigAlert('Cookie文件不存在，请检查文件路径', 'warning');
+            }
+        })
+        .catch(() => {
+            $('#cookie-status').removeClass('badge-success badge-warning')
+                .addClass('badge bg-danger').text('检查失败');
+            showConfigAlert('Cookie验证失败，请稍后重试', 'danger');
+        });
+}
+
+// 导出配置
+function exportConfiguration() {
+    const config = loadConfigFromStorage() || getCurrentConfig();
+    const dataStr = JSON.stringify(config, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `bdpan-config-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showConfigAlert('配置已导出！', 'success');
+}
+
+// 导入配置
+function importConfiguration() {
+    $('#config-upload').click();
+}
+
+// 处理配置文件上传
+function handleConfigFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const config = JSON.parse(e.target.result);
+            
+            // 验证配置格式
+            if (typeof config === 'object' && config !== null) {
+                if (confirm('确定要导入这些配置吗？当前配置将被覆盖。')) {
+                    localStorage.setItem('systemConfig', JSON.stringify(config));
+                    loadCurrentConfig();
+                    showConfigAlert('配置已导入！', 'success');
+                }
+            } else {
+                throw new Error('无效的配置文件格式');
+            }
+            
+        } catch (error) {
+            showConfigAlert('导入失败：' + error.message, 'danger');
+        }
+    };
+    
+    reader.readAsText(file);
+    event.target.value = ''; // 重置文件输入
+}
+
+// 重置配置
+function resetAllConfiguration() {
+    if (confirm('警告：此操作将删除所有配置并重启为初始状态！此操作不可撤销。')) {
+        localStorage.removeItem('systemConfig');
+        loadCurrentConfig();
+        showConfigAlert('配置已完全重置！', 'warning');
+    }
+}
+
+// 切换密码可见性
+function togglePasswordVisibility(inputId) {
+    const input = $(`#${inputId}`);
+    const button = input.next().find('.fas');
+    
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        button.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        button.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+}
+
+// 标记配置为已修改
+let configModified = false;
+
+function markConfigAsModified() {
+    configModified = true;
+    $('.btn-primary').text('保存所有配置');
+    showConfigAlert('配置已修改，请记得保存', 'warning');
+}
+
+function markConfigAsSaved() {
+    configModified = false;
+    $('.btn-primary').text('保存所有配置');
+}
+
+// 页面离开提示
+window.addEventListener('beforeunload', function(e) {
+    if (configModified) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+{% endblock %}

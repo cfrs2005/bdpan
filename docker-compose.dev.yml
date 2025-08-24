@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  bdpan-search:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONPATH=/app
+    volumes:
+      - ./config.json:/app/config.json
+      - ./cookie.txt:/app/cookie.txt
+      # 开发模式：挂载代码文件，支持热重载
+      - ./main.py:/app/main.py
+      - ./auth_manager.py:/app/auth_manager.py
+      - ./config.py:/app/config.py
+      - ./templates:/app/templates
+      - ./static:/app/static
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/status/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

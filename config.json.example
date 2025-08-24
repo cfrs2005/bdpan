@@ -1,0 +1,15 @@
+{
+  "tmdb_api_key": "your_tmdb_api_key_here",
+  "tmdb_language": "zh-CN",
+  "search_api_endpoint": "https://so.example.com/api/search",
+  "movie_path": "/我的资源/2025/电影",
+  "tv_path": "/我的资源/2025/电视剧",
+  "server_host": "0.0.0.0",
+  "server_port": 5001,
+  "debug_mode": true,
+  "api_prefix": "/api",
+  "max_logs": 500,
+  "search_timeout": 30,
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+  "custom_cookies": ""
+}

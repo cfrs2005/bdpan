@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 280px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .header {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #007cba;
+        }
+        .info {
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #005a85;
+        }
+        .link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #007cba;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">豆瓣影视入库助手</div>
+    <div class="info">点击 "配置" 可修改后端服务地址。</div>
+    <button id="configBtn" class="button">配置后端服务</button>
+    <a href="#" id="settingsLink" class="link">高级设置</a>
+
+    <script src="popup.js"></script>
+</body>
+</html>

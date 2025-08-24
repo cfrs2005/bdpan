@@ -1,0 +1,269 @@
+/* 添加config.js相关的最终样式 */
+
+.switch-toggle {
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    position: relative;
+}
+
+.switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 17px;
+    width: 17px;
+    left: 4px;
+    bottom: 3.5px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+    background-color: #2196F3;
+}
+
+input:checked + .switch-slider:before {
+    transform: translateX(26px);
+}
+
+#config-alerts {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 400px;
+}
+
+.config-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-left: 4px solid #007bff;
+    background-color: #f8f9fa;
+}
+
+.input-group-text {
+    min-width: 120px;
+}
+
+.form-check {
+    margin-bottom: 1rem;
+}
+
+.btn-group-config {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggler {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggler:hover {
+    color: #007bff;
+}
+
+/* 修复搜索框布局问题 */
+.search-form {
+    position: relative;
+    z-index: 1;
+}
+
+.search-input {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+
+.search-btn {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* 确保加载模态框不干扰布局 */
+.loading-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+/* 确保alert容器不影响主布局 */
+#alert-container {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: 90%;
+    max-width: 600px;
+}
+
+/* 优化错误提示样式 */
+.alert {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-weight: 500;
+    padding: 16px 20px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border-left: 4px solid #ff4757;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #feca57, #ff9f43);
+    color: #333;
+    border-left: 4px solid #ff6348;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #5f27cd, #341f97);
+    color: white;
+    border-left: 4px solid #00d2d3;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border-left: 4px solid #00cec9;
+}
+
+.alert .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.alert .btn-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 推荐卡片样式 */
+.recommendation-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.recommendation-poster-container {
+    position: relative;
+    height: 300px;
+    width: 200px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.recommendation-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recommendation-poster-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.recommendation-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.recommendation-card:hover .recommendation-overlay {
+    opacity: 1;
+}
+
+.recommendation-card .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.recommendation-card .card-body {
+    background: rgba(248, 249, 250, 0.8);
+}

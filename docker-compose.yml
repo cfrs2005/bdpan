@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  bdpan-search:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONPATH=/app
+    volumes:
+      - ./config.json:/app/config.json
+      - ./cookie.txt:/app/cookie.txt
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/status/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

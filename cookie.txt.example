@@ -1,0 +1,7 @@
+BDUSS=your_baidu_bduss_cookie_here; STOKEN=your_baidu_stoken_cookie_here; PSTM=timestamp_here; 
+# 将您的百度网盘Cookie粘贴到此处
+# 获取方式：
+# 1. 登录百度网盘网页版
+# 2. 按F12打开开发者工具
+# 3. 在Network标签页找到pan.baidu.com的请求
+# 4. 复制完整的Cookie值到此处

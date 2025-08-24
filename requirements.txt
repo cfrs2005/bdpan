@@ -1,0 +1,21 @@
+-i https://mirrors.aliyun.com/pypi/simple/
+--trusted-host mirrors.aliyun.com
+
+Flask==2.3.3
+Flask-Cors==4.0.0
+gevent==23.9.1
+APScheduler==3.10.4
+loguru==0.7.2
+requests==2.31.0
+pytz==2023.3.post1
+python-engineio==4.8.0
+python-socketio==5.10.0
+Cython==3.0.6
+baidupcs-py==0.7.6
+eventlet==0.35.1
+flask-sock>=0.4.0 
+feedparser==6.0.10 
+tmdbv3api==1.9.0
+
+# 可选依赖（WebSocket支持，如果不需要WebSocket功能可以注释掉）
+# gevent-websocket==0.10.1 

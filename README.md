@@ -293,25 +293,55 @@ volumes:
 | POST | `/api/config` | 保存配置 |
 | GET | `/api/status/system` | 系统状态 |
 
-## 🔌 Chrome插件
+## 🔌 Chrome浏览器插件
 
-项目包含Chrome浏览器插件，支持一键收藏功能：
+### 插件功能特性
 
-1. **安装插件**
-   - 打开Chrome浏览器
-   - 进入扩展管理页面 (chrome://extensions/)
-   - 开启"开发者模式"
-   - 点击"加载已解压的扩展程序"
-   - 选择项目中的 `chrome-extension` 文件夹
+- 🎬 **豆瓣网站集成**: 在豆瓣电影页面一键添加到收藏库
+- 🔍 **智能识别**: 自动识别页面中的影视信息
+- ⚡ **快速转存**: 无需切换标签页，直接转存到网盘
+- 🎯 **精准匹配**: 基于TMDB数据库的智能匹配
 
-2. **配置插件**
-   - 点击插件图标进入设置页面
-   - 设置后端服务地址：`http://localhost:5001`
-   - 测试连接确保正常
+### 豆瓣电影页面使用示例
 
-3. **使用插件**
-   - 在任何网页上选中电影/电视剧标题
-   - 点击插件图标一键收藏到百度网盘
+![豆瓣Chrome插件](docs/douban_chrome.png)
+
+在豆瓣电影详情页（如《斗破苍穹》），点击"📥 添加入库"按钮即可一键转存。
+
+### 插件安装与配置
+
+#### 1. 📦 安装插件
+```bash
+# 方法一：从项目源码安装
+git clone https://github.com/cfrs2005/bdpan.git
+cd bdpan/chrome-extension
+
+# 方法二：下载Release版本
+wget https://github.com/cfrs2005/bdpan/releases/latest/download/chrome-extension.zip
+unzip chrome-extension.zip
+```
+
+#### 2. 🔧 Chrome配置
+1. 打开Chrome浏览器
+2. 进入扩展管理页面 (`chrome://extensions/`)
+3. 开启"开发者模式"
+4. 点击"加载已解压的扩展程序"
+5. 选择 `chrome-extension` 文件夹
+
+#### 3. ⚙️ 插件设置
+1. 点击插件图标进入设置页面
+2. 设置后端服务地址：`http://your-nas-ip:5001`
+3. 测试连接确保正常通信
+
+#### 4. 🎯 使用方法
+**豆瓣电影页面**:
+- 直接点击"📥 添加入库"按钮
+- 系统自动识别电影信息并转存
+
+**其他网站**:
+- 选中电影/电视剧标题文本
+- 点击插件图标一键收藏到百度网盘
+- 支持IMDb、烂番茄等国外网站
 
 ## 📁 项目结构
 

@@ -10,7 +10,12 @@ services:
       - FLASK_DEBUG=0
       - PYTHONPATH=/app
     volumes:
-      - ./config.json:/app/config.json:ro
+      # 配置文件 - 可读写挂载，支持Web界面修改配置
+      - ./config.json:/app/config.json
+      # 用户数据目录 - 存储百度网盘认证信息
+      - bdpan-data:/root/.baidupcs
+      # 可选：应用日志目录
+      - bdpan-logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/api/status/system"]
@@ -18,3 +23,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  # 持久化用户认证数据
+  bdpan-data:
+    driver: local
+  # 持久化应用日志
+  bdpan-logs:
+    driver: local

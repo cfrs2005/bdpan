@@ -10,7 +10,10 @@ services:
       - FLASK_DEBUG=1
       - PYTHONPATH=/app
     volumes:
-      - ./config.json:/app/config.json:ro
+      # 配置文件 - 可读写挂载，支持Web界面修改配置
+      - ./config.json:/app/config.json
+      # 用户数据目录 - 存储百度网盘认证信息
+      - bdpan-data-dev:/root/.baidupcs
       # 开发模式：挂载代码文件，支持热重载
       - ./main.py:/app/main.py
       - ./auth_manager.py:/app/auth_manager.py
@@ -24,3 +27,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  # 开发环境用户认证数据
+  bdpan-data-dev:
+    driver: local

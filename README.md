@@ -1,16 +1,66 @@
-# 🔍 百度网盘搜索转存系统
+# 🚀 BDPan Search - 百度网盘智能搜索转存系统
 
-> 一个强大的百度网盘资源搜索和转存工具，支持智能搜索、批量转存、历史记录管理和系统监控。
+<div align="center">
 
-## ✨ 功能特性
+![GitHub License](https://img.shields.io/github/license/cfrs2005/bdpan?style=for-the-badge)
+![Docker Pulls](https://img.shields.io/docker/pulls/cfrs2005/bdpan-search?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/cfrs2005/bdpan?style=for-the-badge)
+![Docker Image Size](https://img.shields.io/docker/image-size/cfrs2005/bdpan-search?style=for-the-badge)
 
-- 🎬 **智能搜索**: 支持电影、电视剧等资源的中英文搜索
-- 🚀 **快速转存**: 一键将搜索结果转存到百度网盘
-- 📊 **实时监控**: 系统状态监控和性能统计
-- 📝 **历史记录**: 完整的搜索和转存历史管理
-- ⚙️ **灵活配置**: 支持API密钥、路径等配置管理
-- 🌐 **现代界面**: 响应式设计，支持多设备访问
-- 🔌 **Chrome插件**: 浏览器插件支持一键收藏
+**一键搜索 | 智能识别 | 自动转存**
+
+*专为绿联NAS优化的百度网盘资源管理工具*
+
+[🏠 首页](http://localhost:5001) | [📚 文档](#) | [🐛 问题反馈](https://github.com/cfrs2005/bdpan/issues) | [💬 讨论区](https://github.com/cfrs2005/bdpan/discussions)
+
+</div>
+
+---
+
+## 🌟 核心特性
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 智能搜索引擎
+- 🔍 **多源聚合**: 整合多个资源站点
+- 🧠 **智能匹配**: TMDB数据库精准识别
+- 🌐 **中英文支持**: 双语搜索无障碍
+- ⚡ **实时结果**: 毫秒级搜索响应
+
+</td>
+<td width="50%">
+
+### 🚀 一键转存系统  
+- 📁 **自动分类**: 电影/电视剧智能归档
+- 🔄 **批量操作**: 支持多个资源同时转存
+- 💾 **持久化存储**: 断电重启数据不丢失
+- 🛡️ **安全可靠**: Cookie加密存储
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📊 实时监控面板
+- 📈 **性能统计**: CPU/内存使用率监控
+- 📋 **操作日志**: 详细的转存历史记录
+- 🚦 **状态指示**: 系统健康状态一目了然
+- 📱 **响应式设计**: 完美适配各种设备
+
+</td>
+<td width="50%">
+
+### 🔧 专业配置管理
+- ⚙️ **Web界面配置**: 无需命令行操作
+- 🔑 **API密钥管理**: 安全的密钥存储
+- 🎨 **主题定制**: 支持暗色/亮色模式
+- 🌍 **多语言支持**: 简体中文界面
+
+</td>
+</tr>
+</table>
 
 ## 📸 界面截图
 
@@ -63,9 +113,78 @@ docker run --rm -v bdpan-data:/data -v $(pwd):/backup alpine tar xzf /backup/bdp
 ### 环境要求
 
 - Docker & Docker Compose
+- 绿联NAS或其他支持Docker的设备
 - Python 3.8+ (本地运行)
 
-### 方法一：使用 Docker (推荐)
+### 方法一：绿联NAS部署 (推荐)
+
+#### 1. 获取TMDB API密钥
+
+访问 [TMDB API官网](https://www.themoviedb.org/settings/api) 获取免费API密钥：
+
+1. 注册TMDB账户
+2. 进入设置 → API页面
+3. 申请API密钥（选择Developer）
+4. 填写应用信息（个人使用即可）
+5. 获得32位API Key（格式：`abcd1234efgh5678...`）
+
+#### 2. 绿联NAS Docker部署
+
+**容器基本信息配置**:
+![绿联容器配置](docs/lvlian_1.png)
+
+- **镜像名称**: `cfrs2005/bdpan-search:latest`
+- **容器名称**: `bdpan-search`
+- **运行状态**: 运行中
+- **CPU使用率**: 通常在1%以下
+- **内存使用**: 约76MB
+
+**存储空间配置**:
+![绿联存储配置](docs/lvlian_2.png)
+
+配置以下目录映射确保数据持久化：
+```
+NAS目录                    → 容器目录                   → 权限
+/docker/bdpan/config.json  → /app/config.json           → 读写
+/docker/bdpan/logs         → /app/logs                  → 读写  
+/docker/bdpan/accounts.json → /root/.baidupcs/accounts.json → 读写
+```
+
+#### 3. 系统配置
+
+**API配置**:
+![API配置界面](docs/lvlian_3.png)
+
+在配置页面的"API配置"标签页中：
+1. **TMDB API密钥**: 输入从TMDB官网获取的32位API Key
+2. **语言设置**: 选择"简体中文"
+3. **资源搜索API**: 保持默认 `https://so.252035.xyz/api/search`
+
+**百度网盘认证**:
+![百度网盘配置](docs/lvlian_4.png)
+
+在"存储配置"标签页中：
+1. **百度网盘Cookie**: 粘贴从浏览器获取的完整Cookie
+2. **账户名称**: 给账户起个名字（可选）
+3. 点击"保存认证"按钮
+
+#### 4. Cookie获取详细步骤
+
+1. 用浏览器打开 [pan.baidu.com](https://pan.baidu.com) 并登录
+2. 按F12打开开发者工具 → Network
+3. 刷新页面 → 选择任意请求 → Headers
+4. 复制Request Headers中的完整Cookie字符串
+5. 粘贴到绿联配置页面
+
+**Cookie示例格式**:
+```
+BYt59P:B:B:AwD2PTUh8NCCG6qePp7XPAOgfKCsVzm3W9Y:C;
+H_WISE_SIDS=62325_6364365_64361_64364_64396_64430_64436_64460_64475_64488_64501;
+Hm_lvt_7a3960b6f067e5b7f96ff5e660b0=1754548205,1754744969,1754823680,1756092965;
+BDCLND=A4o3WUReynhTxSP4lgqomBv%2FGdCcc9lOLfx6vOc%3D; BIDUP
+```
+
+### 方法二：使用 Docker Compose
 
 1. **克隆项目**
 ```bash
@@ -73,44 +192,42 @@ git clone https://github.com/cfrs2005/bdpan.git
 cd bdpan
 ```
 
-2. **配置文件**
+2. **编辑配置**
 ```bash
-# 复制配置文件模板
-cp config.json.example config.json
-
-# 编辑配置文件，添加您的API密钥
-# 百度网盘Cookie将通过Web界面配置
+# 编辑config.json，添加TMDB API密钥
+nano config.json
 ```
 
 3. **启动服务**
 ```bash
-# 生产环境
 docker-compose up -d
-
-# 开发环境 (支持热重载)
-docker-compose -f docker-compose.dev.yml up -d
 ```
 
 4. **访问应用**
 打开浏览器访问: http://localhost:5001
 
-### 方法二：本地运行
+### 方法三：本地开发运行
 
-1. **安装依赖**
+> 🛠️ 适合开发者和高级用户
+
+1. **📦 安装依赖**
 ```bash
 pip install -r requirements.txt
 ```
 
-2. **配置文件**
+2. **⚙️ 配置文件**
 ```bash
 cp config.json.example config.json
-# 编辑配置文件，添加API密钥
+# 编辑配置文件，添加TMDB API密钥
 ```
 
-3. **启动服务**
+3. **🚀 启动服务**
 ```bash
 python main.py
 ```
+
+4. **🌐 访问应用**
+打开浏览器访问: http://localhost:5001
 
 ## 🔧 配置说明
 

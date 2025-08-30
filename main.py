@@ -3,14 +3,26 @@ import json
 import os
 import subprocess
 import traceback
+import logging
+import time
 from tmdbv3api import TMDb, Search
 from flask import Flask, request, render_template, jsonify, session
 from flask_cors import CORS
 import sys
 
+# 直接设置日志，不要函数包装
+log_dir = "/app/logs"
+os.makedirs(log_dir, exist_ok=True)
 
-# 从 docs/require.md 中获取的 TMDb API Key
-TMDB_API_KEY = "04f3d954e65c4598b6863fee20fff697"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(f"{log_dir}/app.log", encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # 电影和电视剧在网盘中的存储路径
 MOVIE_PATH = "/我的资源/2025/电影"
@@ -56,7 +68,7 @@ def search_media(keyword):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"搜索请求失败: {e}")
+        logger.error(f"搜索请求失败: {e}")
         return None
 
 def get_media_type(title):
@@ -64,31 +76,19 @@ def get_media_type(title):
     使用 TMDb API 判断是电影还是电视剧。
     """
     try:
-        # --- Start Debug Logging ---
-        print("\n[DEBUG] Manually fetching TMDb data for analysis...")
-        movie_search_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}&language=zh-CN"
-        tv_search_url = f"https://api.themoviedb.org/3/search/tv?api_key={TMDB_API_KEY}&query={title}&language=zh-CN"
-
-        print(f"[DEBUG] Movie Search URL: {movie_search_url}")
-        movie_response = requests.get(movie_search_url)
-        movie_data = movie_response.json()
-        print("[DEBUG] TMDb Movie Search Raw Response:")
-        print(json.dumps(movie_data, indent=2, ensure_ascii=False))
-
-        print(f"[DEBUG] TV Search URL: {tv_search_url}")
-        tv_response = requests.get(tv_search_url)
-        tv_data = tv_response.json()
-        print("[DEBUG] TMDb TV Search Raw Response:")
-        print(json.dumps(tv_data, indent=2, ensure_ascii=False))
-        print("[DEBUG] --- End Debug Logging ---\n")
-        # --- End Debug Logging ---
-
+        config = get_config()
+        api_key = config.get('tmdb_api_key')
+        if not api_key:
+            logger.error("TMDB API Key未配置")
+            return None
+            
+        logger.info(f"开始查询媒体类型: {title}")
+        
         tmdb = TMDb()
-        tmdb.api_key = TMDB_API_KEY
-        tmdb.language = 'zh-CN'
+        tmdb.api_key = api_key
+        tmdb.language = config.get('tmdb_language', 'zh-CN')
         
         search = Search()
-
         search_movie = search.movies(title)
         search_tv = search.tv_shows(title)
 
@@ -98,17 +98,13 @@ def get_media_type(title):
         movie_popularity = movie_results[0].popularity if movie_results else 0
         tv_popularity = tv_results[0].popularity if tv_results else 0
 
-        if movie_popularity > tv_popularity:
-            return 'movie'
-        elif tv_popularity > 0:
-            return 'tv'
-        else:
-            return None
+        result_type = 'movie' if movie_popularity > tv_popularity else ('tv' if tv_popularity > 0 else None)
+        logger.info(f"媒体类型判断结果: {title} -> {result_type}")
+        return result_type
+        
     except Exception as e:
-        print(f"TMDb API 请求失败: {e}")
-        print("--- Traceback ---")
-        traceback.print_exc()
-        print("-----------------")
+        logger.error(f"TMDb API 请求失败: {e}")
+        logger.error(traceback.format_exc())
         return None
 
 def save_to_pan_cli(shared_url, password, target_dir):
@@ -339,10 +335,12 @@ def api_recommendations():
         tv_page = random.randint(1, 3)
         
         # 获取多种类型的电影内容
+        config = get_config()
+        api_key = config.get('tmdb_api_key')
         movie_endpoints = [
-            f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page={movie_page}",
-            f"https://api.themoviedb.org/3/movie/top_rated?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page=1",
-            f"https://api.themoviedb.org/3/movie/now_playing?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page=1"
+            f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=zh-CN&region=CN&page={movie_page}",
+            f"https://api.themoviedb.org/3/movie/top_rated?api_key={api_key}&language=zh-CN&region=CN&page=1",
+            f"https://api.themoviedb.org/3/movie/now_playing?api_key={api_key}&language=zh-CN&region=CN&page=1"
         ]
         
         all_movies = []
@@ -379,9 +377,9 @@ def api_recommendations():
         
         # 获取多种类型的电视剧内容
         tv_endpoints = [
-            f"https://api.themoviedb.org/3/tv/popular?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page={tv_page}",
-            f"https://api.themoviedb.org/3/tv/top_rated?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page=1",
-            f"https://api.themoviedb.org/3/tv/on_the_air?api_key={TMDB_API_KEY}&language=zh-CN&region=CN&page=1"
+            f"https://api.themoviedb.org/3/tv/popular?api_key={api_key}&language=zh-CN&region=CN&page={tv_page}",
+            f"https://api.themoviedb.org/3/tv/top_rated?api_key={api_key}&language=zh-CN&region=CN&page=1",
+            f"https://api.themoviedb.org/3/tv/on_the_air?api_key={api_key}&language=zh-CN&region=CN&page=1"
         ]
         
         all_tvs = []
@@ -656,8 +654,8 @@ def get_config():
     获取系统配置，优先读取本地配置文件，不存在则返回默认值
     """
     default_config = {
-        "tmdb_api_key": TMDB_API_KEY,
-        "tmdb_language": "zh-CN",
+        "tmdb_api_key": "",
+        "tmdb_language": "zh-CN", 
         "search_api_endpoint": "https://so.252035.xyz/api/search",
         "movie_path": MOVIE_PATH,
         "tv_path": TV_SHOW_PATH,
@@ -724,13 +722,14 @@ def save_to_pan_api(shared_url, password, target_dir):
         return f"转存失败: {str(e)}"
 
 if __name__ == "__main__":
-    print("启动网盘搜索转存系统...")
-    print("访问地址: http://localhost:{}".format(config_data['server_port']))
-    print("支持路由: /, /history, /status, /config")
-    print("新增API:")
-    print("  POST /api/auth/add-user - 添加BaiduPCS认证")
-    print("  GET /api/auth/status    - 检查认证状态")
-    print("  POST /api/auth/test-connection - 测试连接")
+    logger.info("启动网盘搜索转存系统...")
+    logger.info(f"访问地址: http://localhost:{config_data['server_port']}")
+    logger.info("支持路由: /, /history, /status, /config")
+    logger.info("新增API:")
+    logger.info("  POST /api/auth/add-user - 添加BaiduPCS认证")
+    logger.info("  GET /api/auth/status    - 检查认证状态")
+    logger.info("  POST /api/auth/test-connection - 测试连接")
     
-    app.secret_key = 'bdpan-secret-key'  # 用于session
-    app.run(host=config_data['server_host'], port=config_data['server_port'], debug=config_data['debug_mode'])
+    app.secret_key = 'bdpan-secret-key'
+    # 禁用debug模式和reloader避免双进程问题
+    app.run(host=config_data['server_host'], port=config_data['server_port'], debug=False, use_reloader=False)

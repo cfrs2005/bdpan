@@ -407,6 +407,8 @@ $(document).ready(function() {
         $('#nav-history').addClass('active');
     } else if (currentPath.includes('/status')) {
         $('#nav-status').addClass('active');
+    } else if (currentPath.includes('/top100')) {
+        $('#nav-top100').addClass('active');
     } else if (currentPath.includes('/config')) {
         $('#nav-config').addClass('active');
         // 配置页面初始化

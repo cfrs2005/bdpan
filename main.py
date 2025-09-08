@@ -224,6 +224,13 @@ def config():
     """
     return render_template('config.html')
 
+@app.route('/top100')
+def top100():
+    """
+    Top100 影视榜单页面
+    """
+    return render_template('top100.html')
+
 @app.route('/api/save', methods=['POST', 'OPTIONS'])
 def api_save_media():
     """
@@ -721,10 +728,134 @@ def save_to_pan_api(shared_url, password, target_dir):
     except Exception as e:
         return f"转存失败: {str(e)}"
 
+@app.route('/api/top100')
+def api_top100():
+    """
+    获取Top100影视榜单数据
+    """
+    try:
+        year = request.args.get('year', '2025')
+        
+        # 验证年份参数
+        if year not in ['2023', '2024', '2025']:
+            return jsonify({"status": "error", "message": "年份参数无效"}), 400
+        
+        config = get_config()
+        api_key = config.get('tmdb_api_key')
+        if not api_key:
+            return jsonify({"status": "error", "message": "TMDb API Key未配置"}), 500
+        
+        import requests
+        
+        # 获取电影数据
+        movies = get_top_media_by_year(api_key, 'movie', year)
+        
+        # 获取电视剧数据
+        tv_shows = get_top_media_by_year(api_key, 'tv', year)
+        
+        return jsonify({
+            "status": "success",
+            "year": year,
+            "movies": movies[:50],  # 限制返回前50个
+            "tv_shows": tv_shows[:50]  # 限制返回前50个
+        })
+        
+    except Exception as e:
+        logger.error(f"获取Top100数据失败: {e}")
+        return jsonify({"status": "error", "message": "获取数据失败"}), 500
+
+def get_top_media_by_year(api_key, media_type, year):
+    """
+    根据年份获取热门影视作品
+    """
+    try:
+        # 不适合的内容关键词过滤
+        adult_keywords = ['拔作', '成人', '18+', '限制级', 'adult', 'hentai', 'ecchi']
+        
+        # 构建API请求URL
+        if media_type == 'movie':
+            # 对于电影，使用多个端点获取更多数据
+            endpoints = [
+                f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&language=zh-CN&sort_by=popularity.desc&primary_release_year={year}&region=CN",
+                f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=zh-CN&region=CN&page=1",
+                f"https://api.themoviedb.org/3/movie/top_rated?api_key={api_key}&language=zh-CN&region=CN&page=1"
+            ]
+        else:
+            # 对于电视剧，使用多个端点获取更多数据
+            endpoints = [
+                f"https://api.themoviedb.org/3/discover/tv?api_key={api_key}&language=zh-CN&sort_by=popularity.desc&first_air_date_year={year}&region=CN",
+                f"https://api.themoviedb.org/3/tv/popular?api_key={api_key}&language=zh-CN&region=CN&page=1",
+                f"https://api.themoviedb.org/3/tv/top_rated?api_key={api_key}&language=zh-CN&region=CN&page=1"
+            ]
+        
+        all_media = []
+        
+        for url in endpoints:
+            try:
+                response = requests.get(url, timeout=10)
+                data = response.json()
+                results = data.get('results', [])
+                
+                for item in results:
+                    # 过滤不适合内容
+                    title = item.get('title') or item.get('name', '')
+                    overview = item.get('overview', '')
+                    
+                    if item.get('adult', False) or any(keyword in title.lower() or keyword in overview.lower() for keyword in adult_keywords):
+                        continue
+                    
+                    # 检查年份是否匹配
+                    if media_type == 'movie':
+                        release_date = item.get('release_date', '')
+                        if release_date and release_date[:4] != year:
+                            continue
+                    else:
+                        first_air_date = item.get('first_air_date', '')
+                        if first_air_date and first_air_date[:4] != year:
+                            continue
+                    
+                    # 构建媒体项
+                    media_item = {
+                        'name': title,
+                        'type': media_type,
+                        'rating': item.get('vote_average', 0),
+                        'popularity': item.get('popularity', 0),
+                        'poster_path': item.get('poster_path'),
+                        'overview': item.get('overview', ''),
+                        'id': item.get('id')
+                    }
+                    
+                    all_media.append(media_item)
+                    
+            except Exception as e:
+                logger.warning(f"获取{media_type}数据失败: {e}")
+                continue
+        
+        # 按受欢迎程度排序并去重
+        if all_media:
+            # 按受欢迎程度排序
+            all_media.sort(key=lambda x: x['popularity'], reverse=True)
+            
+            # 去重（基于名称）
+            seen_names = set()
+            unique_media = []
+            for item in all_media:
+                if item['name'] not in seen_names:
+                    seen_names.add(item['name'])
+                    unique_media.append(item)
+            
+            return unique_media
+        
+        return []
+        
+    except Exception as e:
+        logger.error(f"获取{media_type}榜单数据失败: {e}")
+        return []
+
 if __name__ == "__main__":
     logger.info("启动网盘搜索转存系统...")
     logger.info(f"访问地址: http://localhost:{config_data['server_port']}")
-    logger.info("支持路由: /, /history, /status, /config")
+    logger.info("支持路由: /, /history, /status, /config, /top100")
     logger.info("新增API:")
     logger.info("  POST /api/auth/add-user - 添加BaiduPCS认证")
     logger.info("  GET /api/auth/status    - 检查认证状态")

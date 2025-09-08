@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}
+Top 100 榜单 - 网盘搜索转存
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <!-- 页面标题 -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-trophy text-warning"></i>
+                Top 100 影视榜单
+            </h1>
+            <p class="lead text-muted">
+                最热门的电影和电视剧榜单，一键搜索转存
+            </p>
+        </div>
+
+        <!-- 年份切换标签 -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto">
+                <ul class="nav nav-pills nav-justified" id="yearTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="year2025-tab" data-bs-toggle="pill" data-bs-target="#year2025" type="button" role="tab" data-year="2025">
+                            <i class="fas fa-star"></i> 2025年
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="year2024-tab" data-bs-toggle="pill" data-bs-target="#year2024" type="button" role="tab" data-year="2024">
+                            <i class="fas fa-star"></i> 2024年
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="year2023-tab" data-bs-toggle="pill" data-bs-target="#year2023" type="button" role="tab" data-year="2023">
+                            <i class="fas fa-star"></i> 2023年
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 榜单内容 -->
+        <div class="tab-content" id="yearTabsContent">
+            <!-- 2025年 -->
+            <div class="tab-pane fade show active" id="year2025" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0"><i class="fas fa-film"></i> Top 50 电影</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="movies-2025" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电影榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0"><i class="fas fa-tv"></i> Top 50 电视剧</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="tv-2025" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电视剧榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2024年 -->
+            <div class="tab-pane fade" id="year2024" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0"><i class="fas fa-film"></i> Top 50 电影</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="movies-2024" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电影榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0"><i class="fas fa-tv"></i> Top 50 电视剧</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="tv-2024" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电视剧榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2023年 -->
+            <div class="tab-pane fade" id="year2023" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0"><i class="fas fa-film"></i> Top 50 电影</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="movies-2023" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电影榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0"><i class="fas fa-tv"></i> Top 50 电视剧</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="tv-2023" class="top-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">正在加载电视剧榜单...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="alert alert-info">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle fa-2x"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5 class="alert-heading">榜单说明</h5>
+                    <ul class="mb-0">
+                        <li>榜单数据来自TMDb API，按照受欢迎程度排序</li>
+                        <li>Top 3 影视有特殊的金色样式显示</li>
+                        <li>点击"快速搜索"按钮可以直接搜索并转存资源</li>
+                        <li>支持切换2025/2024/2023年的榜单数据</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 页面特定脚本
+$(document).ready(function() {
+    // 初始化时加载当前年份的数据
+    const currentYear = $('#yearTabs .nav-link.active').data('year');
+    loadTop100Data(currentYear);
+    
+    // 监听标签切换事件
+    $('#yearTabs button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+        const year = $(e.target).data('year');
+        loadTop100Data(year);
+    });
+});
+
+// 加载Top100数据
+function loadTop100Data(year) {
+    // 显示加载状态
+    showLoading('正在加载榜单数据...');
+    
+    // 检查是否已经加载过该年份数据
+    const moviesContainer = `#movies-${year}`;
+    const tvContainer = `#tv-${year}`;
+    
+    if ($(moviesContainer).find('.top-item').length > 0) {
+        hideLoading();
+        return; // 已经加载过，直接返回
+    }
+    
+    // 调用API获取数据
+    $.ajax({
+        url: `/api/top100?year=${year}`,
+        method: 'GET',
+        success: function(response) {
+            hideLoading();
+            if (response.status === 'success') {
+                renderTopList(moviesContainer, response.movies, 'movie');
+                renderTopList(tvContainer, response.tv_shows, 'tv');
+            } else {
+                showError(moviesContainer, '加载失败');
+                showError(tvContainer, '加载失败');
+            }
+        },
+        error: function() {
+            hideLoading();
+            showError(moviesContainer, '加载失败');
+            showError(tvContainer, '加载失败');
+        }
+    });
+}
+
+// 渲染榜单列表
+function renderTopList(container, items, type) {
+    if (!items || items.length === 0) {
+        showError(container, '暂无数据');
+        return;
+    }
+    
+    let html = '';
+    items.forEach((item, index) => {
+        const rank = index + 1;
+        const isTop3 = rank <= 3;
+        const itemClass = isTop3 ? 'top-item top3' : 'top-item';
+        
+        html += `
+            <div class="${itemClass}" data-rank="${rank}">
+                <div class="rank-number ${isTop3 ? 'top3-rank' : ''}">
+                    ${isTop3 ? '<i class="fas fa-crown"></i>' : rank}
+                </div>
+                <div class="item-info">
+                    <div class="item-title">${item.name}</div>
+                    <div class="item-meta">
+                        <span class="rating">
+                            <i class="fas fa-star text-warning"></i> ${item.rating.toFixed(1)}
+                        </span>
+                        <span class="type-badge badge bg-${type === 'movie' ? 'danger' : 'success'}">
+                            <i class="fas fa-${type === 'movie' ? 'film' : 'tv'}"></i>
+                            ${type === 'movie' ? '电影' : '电视剧'}
+                        </span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-primary btn-sm quick-search-btn" onclick="quickSearch('${item.name}')">
+                        <i class="fas fa-search"></i> 快速搜索
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    $(container).html(html);
+}
+
+// 显示错误信息
+function showError(container, message) {
+    $(container).html(`
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-exclamation-triangle fa-2x"></i>
+            <p class="mt-2">${message}</p>
+        </div>
+    `);
+}
+
+// 快速搜索
+function quickSearch(keyword) {
+    // 跳转到首页并执行搜索
+    window.location.href = `/?keyword=${encodeURIComponent(keyword)}`;
+}
+</script>
+
+<style>
+/* 榜单特定样式 */
+.top-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.top-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border-left: 4px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.top-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.top-item.top3 {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border-left-color: #ffc107;
+    font-weight: bold;
+}
+
+.rank-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.rank-number.top3-rank {
+    background: linear-gradient(135deg, #ffc107, #ff8f00);
+    font-size: 1.2em;
+}
+
+.item-info {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+.item-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.item-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9em;
+}
+
+.rating {
+    color: #666;
+}
+
+.type-badge {
+    font-size: 0.8em;
+}
+
+.item-actions {
+    flex-shrink: 0;
+}
+
+.quick-search-btn {
+    white-space: nowrap;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .top-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .item-meta {
+        justify-content: center;
+    }
+    
+    .rank-number {
+        margin-right: 0;
+    }
+    
+    .item-info {
+        margin-right: 0;
+    }
+}
+</style>
+{% endblock %}

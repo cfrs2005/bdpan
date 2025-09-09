@@ -111,46 +111,181 @@ async function searchMedia(keyword) {
     showLoading('正在搜索资源...');
     
     try {
-        const result = await apiRequest('/api/save', {
+        // 首先获取搜索结果展示
+        const searchResult = await apiRequest('/api/search-only', {
             body: JSON.stringify({ keyword })
         });
         
         hideLoading();
         
-        if (result.status === 'success') {
-            displaySearchResults(result.logs);
-            saveSearchHistory(keyword, result);
-            showAlert('搜索并转存完成！', 'success');
+        if (searchResult.status === 'success' && searchResult.results.length > 0) {
+            // 显示资源卡片
+            displayResourceCards(searchResult.results, keyword);
+            
+            // 询问用户是否要转存
+            if (confirm(`找到 ${searchResult.total} 个资源，是否要转存最佳匹配的资源？`)) {
+                showLoading('正在转存到网盘...');
+                try {
+                    const saveResult = await apiRequest('/api/save', {
+                        body: JSON.stringify({ keyword })
+                    });
+                    hideLoading();
+                    
+                    if (saveResult.status === 'success') {
+                        showAlert('搜索并转存完成！', 'success');
+                        // 显示转存日志
+                        displaySearchLogs(saveResult.logs);
+                    } else {
+                        showAlert(`转存失败: ${saveResult.logs.join(', ')}`, 'danger');
+                    }
+                } catch (error) {
+                    hideLoading();
+                    showAlert(`转存失败: ${error.message}`, 'danger');
+                }
+            }
         } else {
-            showAlert(`搜索失败: ${result.logs.join(', ')}`, 'danger');
+            showAlert(searchResult.message || '未找到相关资源', 'warning');
         }
+        
+        // 保存搜索历史
+        saveSearchHistory(keyword, searchResult);
+        
     } catch (error) {
         hideLoading();
-        showAlert(`请求失败: ${error.message}`, 'danger');
+        showAlert(`搜索失败: ${error.message}`, 'danger');
     }
 }
 
-// 显示搜索结果
-function displaySearchResults(logs) {
+// 显示资源卡片
+function displayResourceCards(results, keyword) {
     const resultsContainer = $('#search-results');
     resultsContainer.empty();
     
-    if (!logs || logs.length === 0) {
-        resultsContainer.append(`
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> 暂无搜索结果
-            </div>
-        `);
-        return;
-    }
+    // 添加搜索结果标题
+    const titleHtml = `
+        <div class="search-results-header mb-4">
+            <h4 class="text-primary">
+                <i class="fas fa-search"></i> 搜索结果: "${keyword}"
+                <span class="badge bg-primary ms-2">${results.length} 个资源</span>
+            </h4>
+        </div>
+    `;
+    resultsContainer.append(titleHtml);
     
-    let html = '<div class="card"><div class="card-header"><i class="fas fa-list"></i> 执行日志</div><div class="card-body"><div class="log-viewer">';
-    logs.forEach(log => {
-        html += `<div>${log}</div>`;
+    // 创建资源卡片网格
+    let cardsHtml = '<div class="row resource-cards-grid">';
+    
+    results.forEach((result, index) => {
+        const card = createResourceCard(result, index);
+        cardsHtml += card;
     });
-    html += '</div></div></div>';
     
-    resultsContainer.hide().fadeIn().append(html);
+    cardsHtml += '</div>';
+    resultsContainer.append(cardsHtml);
+    
+    // 添加动画效果
+    $('.resource-card').each(function(i) {
+        $(this).delay(i * 100).fadeIn();
+    });
+}
+
+// 创建单个资源卡片
+function createResourceCard(result, index) {
+    const sizeText = result.size || '未知大小';
+    const dateText = result.formatted_date || '未知时间';
+    const typeIcon = result.type === 'movie' ? 'fa-film' : 'fa-tv';
+    const typeText = result.type === 'movie' ? '电影' : result.type === 'tv' ? '电视剧' : '资源';
+    const typeColor = result.type === 'movie' ? 'danger' : result.type === 'tv' ? 'success' : 'primary';
+    
+    return `
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card resource-card h-100 shadow-sm" style="display: none;">
+                <div class="card-body">
+                    <div class="resource-header">
+                        <div class="resource-type">
+                            <span class="badge bg-${typeColor}">
+                                <i class="fas ${typeIcon}"></i> ${typeText}
+                            </span>
+                        </div>
+                        <div class="resource-actions">
+                            <button class="btn btn-outline-primary btn-sm" onclick="quickSaveResource(${index})" title="快速转存">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <a href="${result.url}" target="_blank" class="btn btn-outline-info btn-sm" title="查看链接">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <h6 class="resource-title mt-3 mb-2" title="${result.title}">
+                        ${result.title}
+                    </h6>
+                    
+                    <div class="resource-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar text-muted"></i>
+                            <small class="text-muted">${dateText}</small>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-hdd text-muted"></i>
+                            <small class="text-muted">${sizeText}</small>
+                        </div>
+                    </div>
+                    
+                    ${result.password ? `
+                        <div class="resource-password mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-key"></i> 提取码: <code>${result.password}</code>
+                            </small>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="resource-footer mt-3">
+                        <button class="btn btn-primary btn-sm w-100" onclick="saveAndSearch('${result.title}')">
+                            <i class="fas fa-download"></i> 搜索并转存
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 快速转存资源
+async function quickSaveResource(index) {
+    // 这个功能将在后续实现
+    showAlert('快速转存功能正在开发中', 'info');
+}
+
+// 搜索并转存
+function saveAndSearch(keyword) {
+    $('#search-keyword').val(keyword);
+    searchMedia(keyword);
+}
+
+// 显示搜索日志
+function displaySearchLogs(logs) {
+    const resultsContainer = $('#search-results');
+    
+    const logsHtml = `
+        <div class="card mt-4">
+            <div class="card-header bg-light">
+                <i class="fas fa-list"></i> 执行日志
+            </div>
+            <div class="card-body">
+                <div class="log-viewer">
+                    ${logs.map(log => `<div class="log-line">${log}</div>`).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultsContainer.append(logsHtml);
+}
+
+// 显示搜索结果（兼容旧版本）
+function displaySearchResults(logs) {
+    displaySearchLogs(logs);
 }
 
 // 显示搜索中的结果

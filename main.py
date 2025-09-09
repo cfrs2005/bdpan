@@ -5,6 +5,7 @@ import subprocess
 import traceback
 import logging
 import time
+from datetime import datetime
 from tmdbv3api import TMDb, Search
 from flask import Flask, request, render_template, jsonify, session
 from flask_cors import CORS
@@ -710,6 +711,22 @@ config_data = get_config()
 import time
 startup_time = time.time()
 
+def format_datetime(datetime_str):
+    """
+    格式化日期时间字符串
+    """
+    try:
+        # 尝试解析不同的日期时间格式
+        for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d', '%Y/%m/%d %H:%M:%S', '%Y/%m/%d']:
+            try:
+                dt = datetime.strptime(datetime_str, fmt)
+                return dt.strftime('%Y-%m-%d %H:%M')
+            except ValueError:
+                continue
+        return datetime_str
+    except Exception:
+        return datetime_str
+
 def save_to_pan_api(shared_url, password, target_dir):
     """
     使用 BaiduPCS-Py 库将分享链接转存到指定目录
@@ -727,6 +744,55 @@ def save_to_pan_api(shared_url, password, target_dir):
             
     except Exception as e:
         return f"转存失败: {str(e)}"
+
+@app.route('/api/search-only', methods=['POST'])
+def api_search_only():
+    """
+    仅搜索资源，不执行转存操作
+    """
+    try:
+        data = request.get_json()
+        if not data or 'keyword' not in data:
+            return jsonify({"status": "error", "message": "请求体中必须包含 'keyword' 字段。"}), 400
+        
+        keyword = data['keyword']
+        search_results = search_media(keyword)
+        
+        if not search_results or not search_results.get('data', {}).get('merged_by_type', {}).get('baidu'):
+            return jsonify({"status": "success", "results": [], "message": "未找到相关资源"})
+        
+        # 获取百度网盘搜索结果
+        baidu_results = search_results['data']['merged_by_type']['baidu']
+        
+        # 增强搜索结果信息
+        enhanced_results = []
+        for result in baidu_results:
+            # 解析标题和基本信息
+            title = result.get('note', '').split('/')[0].strip()
+            datetime_str = result.get('datetime', '')
+            
+            # 构建增强的结果对象
+            enhanced_result = {
+                'title': title,
+                'full_note': result.get('note', ''),
+                'datetime': datetime_str,
+                'url': result.get('url', ''),
+                'password': result.get('password', ''),
+                'size': result.get('size', '未知大小'),
+                'type': result.get('type', 'unknown'),
+                'formatted_date': format_datetime(datetime_str) if datetime_str else '未知时间'
+            }
+            enhanced_results.append(enhanced_result)
+        
+        return jsonify({
+            "status": "success", 
+            "results": enhanced_results,
+            "total": len(enhanced_results)
+        })
+        
+    except Exception as e:
+        logger.error(f"搜索失败: {e}")
+        return jsonify({"status": "error", "message": f"搜索失败: {str(e)}"}), 500
 
 @app.route('/api/top100')
 def api_top100():

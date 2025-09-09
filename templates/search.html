@@ -37,7 +37,7 @@
                 </div>
                 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg search-btn" id="search-btn">
+                    <button type="submit" class="btn btn-primary search-btn" id="search-btn">
                         <i class="fas fa-search"></i>
                         <span class="btn-text">立即搜索并转存</span>
                     </button>
@@ -49,7 +49,7 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-tags"></i> 热门搜索</span>
-                <button class="btn btn-sm btn-outline-secondary" onclick="loadRecommendations()">
+                <button class="btn btn-outline-secondary btn-sm" onclick="loadRecommendations()">
                     <i class="fas fa-sync"></i> 刷新推荐
                 </button>
             </div>
@@ -263,6 +263,21 @@
 $(document).ready(function() {
     // 焦点到搜索框
     $('#search-keyword').focus();
+    
+    // 检查URL参数中是否有搜索关键词
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get('keyword');
+    const autoSearch = urlParams.get('auto_search') === 'true';
+    
+    if (keyword) {
+        $('#search-keyword').val(keyword);
+        if (autoSearch) {
+            // 延迟执行搜索，确保页面完全加载
+            setTimeout(() => {
+                $('#search-form').submit();
+            }, 500);
+        }
+    }
     
     // 搜索框回车键监听
     $('#search-keyword').on('keypress', function(e) {

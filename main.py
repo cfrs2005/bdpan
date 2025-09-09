@@ -140,9 +140,90 @@ def save_to_pan_cli(shared_url, password, target_dir):
         log_messages.append(error_message)
         return "\n".join(log_messages)
 
+def search_only(keyword):
+    """
+    仅执行搜索功能，返回搜索结果
+    """
+    logs = []
+
+    logs.append(f"正在搜索: {keyword}...")
+    search_results = search_media(keyword)
+
+    if not search_results or not search_results.get('data', {}).get('merged_by_type', {}).get('baidu'):
+        logs.append("未找到相关资源。")
+        return {"status": "error", "logs": logs, "search_results": None}
+
+    try:
+        best_result = sorted(search_results['data']['merged_by_type']['baidu'], key=lambda x: x['datetime'], reverse=True)[0]
+    except (IndexError, KeyError):
+        logs.append("搜索结果格式不正确，无法找到最佳匹配。")
+        return {"status": "error", "logs": logs, "search_results": None}
+        
+    title = best_result.get('note', '').split('/')[0].strip()
+    link = best_result.get('url')
+    password = best_result.get('password')
+
+    if not all([title, link, password]):
+        logs.append("错误: 搜索结果缺少必要信息。")
+        return {"status": "error", "logs": logs, "search_results": None}
+
+    logs.append(f"找到资源: {title}")
+    logs.append(f"判断影视类型...")
+    media_type = get_media_type(keyword)
+
+    if media_type == 'movie':
+        logs.append("类型: 电影")
+        target_path = MOVIE_PATH
+    elif media_type == 'tv':
+        logs.append("类型: 电视剧")
+        target_path = TV_SHOW_PATH
+    else:
+        logs.append("未能确定影视类型")
+        target_path = None
+
+    return {
+        "status": "success", 
+        "logs": logs, 
+        "search_results": {
+            "title": title,
+            "link": link,
+            "password": password,
+            "media_type": media_type,
+            "target_path": target_path
+        }
+    }
+
+def save_only(title, link, password, media_type):
+    """
+    仅执行转存功能
+    """
+    logs = []
+
+    ready, msg = check_auth_ready()
+    if not ready:
+        logs.append(f"错误: {msg}")
+        return {"status": "error", "logs": logs}
+
+    logs.append(f"开始转存: {title}")
+    
+    if media_type == 'movie':
+        logs.append("类型: 电影")
+        target_path = MOVIE_PATH
+    elif media_type == 'tv':
+        logs.append("类型: 电视剧")
+        target_path = TV_SHOW_PATH
+    else:
+        logs.append("未知媒体类型，默认使用电影路径")
+        target_path = MOVIE_PATH
+
+    result = save_to_pan_api(link, password, target_path)
+    logs.append(result)
+    
+    return {"status": "success", "logs": logs}
+
 def run_workflow(keyword):
     """
-    执行从搜索到转存的完整工作流
+    执行从搜索到转存的完整工作流（保持向后兼容）
     """
     logs = []
 
@@ -231,10 +312,68 @@ def top100():
     """
     return render_template('top100.html')
 
+@app.route('/api/search', methods=['POST', 'OPTIONS'])
+def api_search_only():
+    """
+    仅执行搜索功能，返回搜索结果（不执行转存）
+    """
+    # 处理OPTIONS预检请求
+    if request.method == 'OPTIONS':
+        response = jsonify({})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+    
+    data = request.get_json()
+    if not data or 'keyword' not in data:
+        response = jsonify({"status": "error", "message": "请求体中必须包含 'keyword' 字段。"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
+
+    keyword = data['keyword']
+    result = search_only(keyword)
+    
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route('/api/save-media', methods=['POST', 'OPTIONS'])
+def api_save_only():
+    """
+    仅执行转存功能，需要提供搜索结果数据
+    """
+    # 处理OPTIONS预检请求
+    if request.method == 'OPTIONS':
+        response = jsonify({})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+    
+    data = request.get_json()
+    required_fields = ['title', 'link', 'password', 'media_type']
+    
+    if not data or not all(field in data for field in required_fields):
+        response = jsonify({"status": "error", "message": f"请求体中必须包含以下字段: {', '.join(required_fields)}"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
+
+    title = data['title']
+    link = data['link']
+    password = data['password']
+    media_type = data['media_type']
+    
+    result = save_only(title, link, password, media_type)
+    
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 @app.route('/api/save', methods=['POST', 'OPTIONS'])
 def api_save_media():
     """
-    通过 API 接收关键字并执行转存工作流。
+    通过 API 接收关键字并执行转存工作流。（保持向后兼容，主要用于Chrome插件）
     """
     # 处理OPTIONS预检请求
     if request.method == 'OPTIONS':

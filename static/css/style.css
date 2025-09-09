@@ -1,3 +1,69 @@
+/* 搜索和入库功能分离样式 */
+
+.search-btn, .save-btn, .quick-add-btn {
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.quick-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 按钮图标样式 */
+.search-btn i, .save-btn i, .quick-add-btn i {
+    margin-right: 8px;
+}
+
+/* 搜索结果详情卡片 */
+.search-result-detail {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.search-result-detail .card-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-result-detail .badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* 按钮状态提示 */
+.btn-text {
+    font-weight: 600;
+}
+
+/* 响应式按钮布局 */
+@media (max-width: 768px) {
+    .search-btn, .save-btn, .quick-add-btn {
+        font-size: 16px;
+        padding: 12px 20px;
+    }
+    
+    .btn-text {
+        font-size: 14px;
+    }
+}
+
 /* 添加config.js相关的最终样式 */
 
 .switch-toggle {

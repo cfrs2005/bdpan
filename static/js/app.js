@@ -1,6 +1,7 @@
 // 全局变量
 const API_BASE_URL = '';
 let currentSearchResults = [];
+let currentSearchData = null; // 存储当前搜索结果数据
 
 // 工具函数
 function showLoading(message = '请稍候...') {
@@ -111,6 +112,73 @@ async function searchMedia(keyword) {
     showLoading('正在搜索资源...');
     
     try {
+        const result = await apiRequest('/api/search', {
+            body: JSON.stringify({ keyword })
+        });
+        
+        hideLoading();
+        
+        if (result.status === 'success') {
+            currentSearchData = result.search_results;
+            displaySearchResults(result.logs, true);
+            showAlert('搜索完成！', 'success');
+            
+            // 显示"添加入库"按钮
+            $('#save-btn').show();
+        } else {
+            showAlert(`搜索失败: ${result.logs.join(', ')}`, 'danger');
+            $('#save-btn').hide();
+        }
+    } catch (error) {
+        hideLoading();
+        showAlert(`请求失败: ${error.message}`, 'danger');
+        $('#save-btn').hide();
+    }
+}
+
+// 添加入库功能
+async function saveMedia() {
+    if (!currentSearchData) {
+        showAlert('请先搜索资源', 'warning');
+        return;
+    }
+    
+    showLoading('正在添加入库...');
+    
+    try {
+        const result = await apiRequest('/api/save-media', {
+            body: JSON.stringify({
+                title: currentSearchData.title,
+                link: currentSearchData.link,
+                password: currentSearchData.password,
+                media_type: currentSearchData.media_type
+            })
+        });
+        
+        hideLoading();
+        
+        if (result.status === 'success') {
+            displaySearchResults(result.logs, false);
+            showAlert('添加入库完成！', 'success');
+        } else {
+            showAlert(`入库失败: ${result.logs.join(', ')}`, 'danger');
+        }
+    } catch (error) {
+        hideLoading();
+        showAlert(`请求失败: ${error.message}`, 'danger');
+    }
+}
+
+// 快速入库功能（搜索并转存）
+async function quickAddMedia(keyword) {
+    if (!keyword.trim()) {
+        showAlert('请输入搜索关键词', 'warning');
+        return;
+    }
+    
+    showLoading('正在快速入库...');
+    
+    try {
         const result = await apiRequest('/api/save', {
             body: JSON.stringify({ keyword })
         });
@@ -118,11 +186,11 @@ async function searchMedia(keyword) {
         hideLoading();
         
         if (result.status === 'success') {
-            displaySearchResults(result.logs);
+            displaySearchResults(result.logs, false);
             saveSearchHistory(keyword, result);
-            showAlert('搜索并转存完成！', 'success');
+            showAlert('快速入库完成！', 'success');
         } else {
-            showAlert(`搜索失败: ${result.logs.join(', ')}`, 'danger');
+            showAlert(`快速入库失败: ${result.logs.join(', ')}`, 'danger');
         }
     } catch (error) {
         hideLoading();
@@ -131,7 +199,7 @@ async function searchMedia(keyword) {
 }
 
 // 显示搜索结果
-function displaySearchResults(logs) {
+function displaySearchResults(logs, isSearchOnly = false) {
     const resultsContainer = $('#search-results');
     resultsContainer.empty();
     
@@ -149,6 +217,33 @@ function displaySearchResults(logs) {
         html += `<div>${log}</div>`;
     });
     html += '</div></div></div>';
+    
+    // 如果是搜索结果且搜索成功，显示搜索结果详情
+    if (isSearchOnly && currentSearchData) {
+        html += `
+            <div class="card mt-3">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i> 搜索结果详情
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>标题:</strong> ${currentSearchData.title}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>类型:</strong> ${currentSearchData.media_type === 'movie' ? '电影' : currentSearchData.media_type === 'tv' ? '电视剧' : '未知'}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>目标路径:</strong> ${currentSearchData.target_path || '未确定'}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>状态:</strong> <span class="badge bg-warning">待入库</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
     
     resultsContainer.hide().fadeIn().append(html);
 }
@@ -434,7 +529,18 @@ $(document).ready(function() {
         searchMedia(keyword);
     });
     
-    // 快捷搜索按钮
+    // 添加入库按钮
+    $('#save-btn').on('click', function() {
+        saveMedia();
+    });
+    
+    // 快速入库按钮
+    $('#quick-add-btn').on('click', function() {
+        const keyword = $('#search-keyword').val();
+        quickAddMedia(keyword);
+    });
+    
+    // 快捷搜索按钮（使用搜索功能）
     $('[data-search]').on('click', function() {
         const keyword = $(this).data('search');
         $('#search-keyword').val(keyword);
